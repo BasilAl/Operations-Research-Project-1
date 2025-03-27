@@ -1,7 +1,8 @@
-from typing import Tuple
 import numpy as np
 from ortools.graph.python import linear_sum_assignment
 import os
+
+from helpers import extract_data
 
 PROBLEMS_PATH = "problems/"
 SOLUTIONS_DIR = "solutions"
@@ -9,31 +10,8 @@ if not os.path.exists(SOLUTIONS_DIR):
     os.makedirs(SOLUTIONS_DIR)
 
 
-def extract_table(
-    filepath: str = "problems/assign100.txt",
-) -> Tuple[int, np.array]:
-    with open(filepath, "rt") as f:
-        number = int(f.readline().strip().strip("\n"))
-        rows = []
-        temp = []
-        for line in f.readlines():
-            temp += [int(x) for x in line.strip().strip("\n").split(" ")]
-            if len(temp) >= number:
-                rows.append(temp)
-                temp = []
-        if temp:
-            rows += temp
-        try:
-            assert len(rows) == number
-            for row in rows:
-                assert len(row) == number
-        except AssertionError:
-            raise IOError("File contents do not match given pattern.")
-    return number, np.array(rows)
-
-
 def lp_solver(filepath: str, verbose: bool = False) -> None:
-    count, costs = extract_table(filepath)
+    count, costs = extract_data(filepath, output_type="array")
     end_nodes_unraveled, start_nodes_unraveled = np.meshgrid(
         np.arange(costs.shape[1]), np.arange(costs.shape[0])
     )
